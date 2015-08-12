@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Acceptor.cpp" />
+    <ClCompile Include="AcceptorManager.cpp" />
+    <ClCompile Include="Dispatcher.cpp" />
+    <ClCompile Include="EventObject.cpp" />
+    <ClCompile Include="IOMultiplexer.cpp" />
+    <ClCompile Include="Link.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="NetworkThread.cpp" />
+    <ClCompile Include="Precompiled.cpp" />
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="SessionManager.cpp" />
+    <ClCompile Include="Socket.cpp" />
+    <ClCompile Include="Stream.cpp" />
+    <ClCompile Include="StreamQueue.cpp" />
+    <ClCompile Include="TestDispatcher.cpp" />
+    <ClCompile Include="Thread.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Acceptor.h" />
+    <ClInclude Include="AcceptorManager.h" />
+    <ClInclude Include="CommonTypes.h" />
+    <ClInclude Include="Dispatcher.h" />
+    <ClInclude Include="EventObject.h" />
+    <ClInclude Include="GamePacket.h" />
+    <ClInclude Include="IOMultiplexer.h" />
+    <ClInclude Include="Link.h" />
+    <ClInclude Include="NetworkThread.h" />
+    <ClInclude Include="PacketBase.h" />
+    <ClInclude Include="Precompiled.h" />
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="SessionManager.h" />
+    <ClInclude Include="Socket.h" />
+    <ClInclude Include="Stream.h" />
+    <ClInclude Include="StreamQueue.h" />
+    <ClInclude Include="TestDispatcher.h" />
+    <ClInclude Include="Thread.h" />
+  </ItemGroup>
+</Project>
