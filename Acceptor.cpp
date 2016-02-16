@@ -33,9 +33,12 @@ bool Acceptor::open(const char* ip, unsigned short port)
 	if (_sock.listen() == false)
 		return false;
 
+#ifdef WIN32
+#else
 	uint32_t events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	if (_ioMux->regist(_sock.getfd(), events, this) == false)
 		return false;
+#endif
 
 	return true;
 }
@@ -54,12 +57,15 @@ void Acceptor::onAccept()
 
 	s->socket().setfd(fd);
 
+#ifdef WIN32
+#else
 	uint32_t events = EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLERR;
 	if (_ioMux->regist(s->socket().getfd(), events, s) == false)
 	{
 		printf("cannot regist event for new session\n");
 		return;
 	}
+#endif
 
 	printf( "ip = %s  port = %d\n", inet_ntoa(addr.sin_addr),  ntohs((short)addr.sin_port));
 }

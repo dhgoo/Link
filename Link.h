@@ -25,6 +25,8 @@ public:
 	Link();
 	~Link();
 
+	void close();
+
 	void run();
 
 	void stop();
@@ -39,7 +41,5 @@ public:
 
 private:
 	bool init(int maxSessions = MAX_SESSIONS);
-
-	void close();
 };
 

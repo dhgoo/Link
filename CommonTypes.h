@@ -4,6 +4,8 @@
 #define SAFE_DELETES(p) 	if (p) { delete[] p; p = nullptr; }
 
 #define MAX_SESSIONS 10000
+#define MAX_SEND_BUFFER 1024
+#define MAX_RECV_BUFFER 1024
 
 enum EventErrorType
 {

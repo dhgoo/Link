@@ -7,8 +7,7 @@ int main(int argc, char* argv[])
 	Dispatcher disp;
 
 	Link link;
-	int fd = link.open(9999, &disp);
-	if (fd == -1)
+	if (link.open(9999, &disp) == false)
 		return 1;
 
 	link.run();
