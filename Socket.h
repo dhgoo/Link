@@ -1,9 +1,16 @@
 #pragma once
 
+#ifdef WIN32
+#include <io.h>
+typedef int socklen_t;
+#else //WIN32
+typedef int SOCKET;
+#endif //WIN32
+
 class Socket
 {
 private:
-	int _fd;
+	SOCKET _fd;
 
 public:
 	Socket();
@@ -39,13 +46,13 @@ public:
 	bool nonblock();
 
 	// set reuse address 
-	bool reuse();
+	bool reuseaddrs();
 
-	// 
-	bool disableTimeWait();
+	// disable TIME-WAIT
+	bool notimewait();
 
-	// 
-	bool nagleOff();
+	// nagle algorithm off
+	bool nagleoff();
 
 	// 
 	int getSendBufSize();

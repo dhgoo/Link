@@ -27,7 +27,7 @@ bool Acceptor::open(const char* ip, unsigned short port)
 	if (_sock.nonblock() == false)
 		return false;
 
-	if (_sock.reuse() == false)
+	if (_sock.reuseaddrs() == false)
 		return false;
 
 	if (_sock.listen() == false)
