@@ -21,6 +21,10 @@ Link::Link()
 
 Link::~Link()
 {
+	stop();
+
+	close();
+
 	if (_acceptorManager) 
 		delete _acceptorManager;
 
@@ -70,7 +74,7 @@ void Link::close()
 void Link::run()
 {
 	_running = true;
-	_networkThread->run();
+	_networkThread->start();
 }
 
 void Link::stop()
@@ -85,16 +89,17 @@ bool Link::isRunning()
 
 bool Link::open(unsigned short port, Dispatcher* disp)
 {
+	if (_initialized == false) init();
+
 	return this->open(nullptr, port, disp); 
 }
 
 bool Link::open(const char* ip, unsigned short port, Dispatcher* disp)
 {
-	if (_initialized == false)
-		return false;
+	if (_initialized == false) init();
 
 	Acceptor* acceptor = _acceptorManager->create(disp);
-	if (acceptor->open(port) == false)
+	if (acceptor->open(ip, port) == false)
 		return false;
 
 	return true;
@@ -102,8 +107,7 @@ bool Link::open(const char* ip, unsigned short port, Dispatcher* disp)
 
 bool Link::connect(const char* ip, unsigned short port, Dispatcher* disp)
 {
-	if (_initialized == false)
-		return false;
+	if (_initialized == false) init();
 
 	return true;
 }

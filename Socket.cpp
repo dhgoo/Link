@@ -22,9 +22,9 @@ int Socket::create(int type)
 	if (_fd == -1)
 #ifdef WIN32
 		printf("fail socket() err(%d)\n", WSAGetLastError());
-#else //WIN32
+#else
 		printf("fail socket() err(%d) : %s\n", errno, strerror(errno));
-#endif //WIN32
+#endif
 	
 	return _fd;
 }
@@ -81,9 +81,9 @@ int Socket::recv(void* buf, size_t count)
 {
 #ifdef WIN32
 	int rbytes = ::recv(_fd, (char *)buf, count, 0);
-#else //WIN32
+#else
 	ssize_t rbytes = read(_fd, buf, count);
-#endif //WIN32
+#endif
 	if (rbytes == -1)
 	{
 #ifdef WIN32
@@ -107,16 +107,16 @@ int Socket::send(const void* buf, size_t count)
 {
 #ifdef WIN32
 	int sbytes = ::send(_fd, (char *)buf, count, 0);
-#else //WIN32
+#else
 	ssize_t sbytes = write(_fd, buf, count);
-#endif //WIN32
+#endif
 	if (sbytes == -1)
 	{
 #ifdef WIN32
 		if (WSAGetLastError() == WSAEWOULDBLOCK)
-#else //WIN32
+#else
 		if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
-#endif //WIN32
+#endif
 			return 0;
 		else
 			return -1;
@@ -130,7 +130,7 @@ bool Socket::nonblock()
 #ifdef WIN32
 	u_long flag = 1;
 	ioctlsocket(_fd, FIONBIO, &flag);
-#else //WIN32
+#else
 	int flags = fcntl(_fd, F_GETFL, 0);
 	if (flags == -1)
 	{
@@ -143,7 +143,7 @@ bool Socket::nonblock()
 		printf("fail fcntl(F_SETFL) err(%d) : %s\n", errno, strerror(errno));
 		return false;
 	}
-#endif //WIN32
+#endif
 
 	return true;
 }
@@ -168,9 +168,9 @@ bool Socket::notimewait()
 
 #ifdef WIN32
 	if (setsockopt(_fd, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof(l)) != 0)
-#else //WIN32
+#else
 	if (setsockopt(_fd, SOL_SOCKET, SO_LINGER, (void*)&l, sizeof(l)) != 0)
-#endif //WIN32
+#endif
 	{
 		printf("fail setsockopt(SO_LINGER) err(%d) : %s\n", errno, strerror(errno));
 		return false;
@@ -184,9 +184,9 @@ bool Socket::nagleoff()
 	int optval = 0;
 #ifdef WIN32
 	if (setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, (const char*)&optval, sizeof(optval)) != 0)
-#else //WIN32
+#else
 	if (setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval)) != 0)
-#endif //WIN32
+#endif
 	{
 		printf("fail setsockopt(TCP_NODELAY) err(%d) : %s\n", errno, strerror(errno));
 		return false;
@@ -194,70 +194,3 @@ bool Socket::nagleoff()
 	
 	return true;
 }
-
-int Socket::getSendBufSize()
-{
-	int bufsize = 0;
-#ifdef WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
-#else //WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
-#endif //WIN32
-	{
-		printf("fail setsockopt(SO_SNDBUF) err(%d) : %s\n", errno, strerror(errno));
-		return -1;
-	}
-	
-	return bufsize;
-}
-
-int Socket::getRecvBufSize()
-{
-	int bufsize = 0;
-#ifdef WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
-#else //WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
-#endif //WIN32
-	{
-		printf("fail setsockopt(SO_REVBUF) err(%d) : %s\n", errno, strerror(errno));
-		return -1;
-	}
-	
-	return bufsize;
-}
-
-bool Socket::setSendBufSize(int size)
-{
-	int bufsize = size;
-#ifdef WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
-#else //WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
-#endif //WIN32
-	{
-		printf("fail setsockopt(SO_SNDBUF) err(%d) : %s\n", errno, strerror(errno));
-		return false;
-	}
-	
-	return true;
-}
-
-bool Socket::setRecvBufSize(int size)
-{
-	int bufsize = size;
-#ifdef WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
-#else //WIN32
-	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
-#endif //WIN32
-	{
-		printf("fail setsockopt(SO_REVBUF) err(%d) : %s\n", errno, strerror(errno));
-		return false;
-	}
-	
-	return true;
-}
-
-
-

@@ -3,9 +3,7 @@
 #define SAFE_DELETE(p) 	if (p) { delete   p; p = nullptr; }
 #define SAFE_DELETES(p) 	if (p) { delete[] p; p = nullptr; }
 
-#define MAX_SESSIONS 20480
-#define MAX_SEND_BUFFER 1024
-#define MAX_RECV_BUFFER 1024
+#define MAX_SESSIONS 10000
 
 enum EventErrorType
 {
@@ -13,3 +11,8 @@ enum EventErrorType
 	EVENT_ERROR_PARSING = -2,
 };
 
+#ifdef WIN32
+typedef int socklen_t;
+#else
+typedef int SOCKET;
+#endif

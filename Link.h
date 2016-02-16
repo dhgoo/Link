@@ -25,10 +25,6 @@ public:
 	Link();
 	~Link();
 
-	bool init(int maxSessions = MAX_SESSIONS);
-
-	void close();
-
 	void run();
 
 	void stop();
@@ -40,5 +36,10 @@ public:
 	bool open(const char* ip, unsigned short port, Dispatcher* disp);
 
 	bool connect(const char* ip, unsigned short port, Dispatcher* disp);
+
+private:
+	bool init(int maxSessions = MAX_SESSIONS);
+
+	void close();
 };
 
