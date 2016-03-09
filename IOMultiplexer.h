@@ -7,7 +7,7 @@ class IOMultiplexer
 private:
 
 #ifdef WIN32
-	HANDLE _hCompletionHandle;
+	HANDLE _iocp;
 #else
 	int _epfd;
 	int _maxevents;
@@ -23,9 +23,9 @@ public:
 	void close();
 
 #ifdef WIN32
-	bool regist(int fd, uint32_t events, void* ptr);
+	bool regist(SOCKET s);
 	bool unregist(int fd);
-	bool waitForEvents();
+	bool waitForEvents(unsigned long* transferred, unsigned long* key, LPOVERLAPPED* overlapped);
 #else
 	bool regist(int fd, uint32_t events, void* ptr);	
 	bool unregist(int fd);	

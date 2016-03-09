@@ -5,7 +5,7 @@
 
 IOMultiplexer::IOMultiplexer()
 #ifdef WIN32
-	: _hCompletionHandle(INVALID_HANDLE_VALUE)
+	: _iocp(INVALID_HANDLE_VALUE)
 #else
 	: _epfd(-1)
 	, _events(nullptr)
@@ -21,8 +21,8 @@ IOMultiplexer::~IOMultiplexer()
 bool IOMultiplexer::create()
 {
 #ifdef WIN32
-	_hCompletionHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	if (NULL == _hCompletionHandle)
+	_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
+	if (NULL == _iocp)
 	{
 		printf("fail CreateIoCompletionPort(%u)", GetLastError());
 		return false;
@@ -47,8 +47,8 @@ bool IOMultiplexer::create()
 void IOMultiplexer::close()
 {
 #ifdef WIN32
-	if (_hCompletionHandle != INVALID_HANDLE_VALUE)
-		CloseHandle(_hCompletionHandle);
+	if (_iocp != INVALID_HANDLE_VALUE)
+		CloseHandle(_iocp);
 #else
 	::close(_epfd);
 
@@ -58,8 +58,15 @@ void IOMultiplexer::close()
 }
 
 #ifdef WIN32
-bool IOMultiplexer::regist(int fd, uint32_t events, void* ptr)
+bool IOMultiplexer::regist(SOCKET s)
 {
+	HANDLE h = CreateIoCompletionPort((HANDLE)s, _iocp, (unsigned long)s, 0);
+	if (NULL == h)
+	{
+		printf("fail regist CreateIoCompletionPort(%u)", GetLastError());
+		return false;
+	}
+
 	return true;
 }
 #else
@@ -106,7 +113,16 @@ bool IOMultiplexer::unregist(int fd)
 #ifdef WIN32
 bool IOMultiplexer::waitForEvents()
 {
-	return true;
+#ifdef WIN32
+	LPOVERLAPPED	overlapped = nullptr;
+	unsigned long	transferred = 0;
+	unsigned long	key = 0;
+	bool			result = false;
+#endif
+
+	return GetQueuedCompletionStatus(_iocp, transferred, key, overlapped, INFINITE) ? true : false;
+
+	EventObject
 }
 #else
 bool IOMultiplexer::waitForEvents()

@@ -13,8 +13,12 @@ enum EventObjectType
 class EventObject
 {
 protected:
-	int _type;
+#ifdef WIN32
+	OVERLAPPED _overlapped;
+#else
 	Socket _sock;
+#endif
+	int _type;	
 
 public:
 	EventObject();

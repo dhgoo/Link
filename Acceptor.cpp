@@ -34,6 +34,7 @@ bool Acceptor::open(const char* ip, unsigned short port)
 		return false;
 
 #ifdef WIN32
+
 #else
 	uint32_t events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	if (_ioMux->regist(_sock.getfd(), events, this) == false)
@@ -58,6 +59,7 @@ void Acceptor::onAccept()
 	s->socket().setfd(fd);
 
 #ifdef WIN32
+
 #else
 	uint32_t events = EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLERR;
 	if (_ioMux->regist(s->socket().getfd(), events, s) == false)

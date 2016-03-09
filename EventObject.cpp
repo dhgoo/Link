@@ -4,6 +4,9 @@
 EventObject::EventObject()
 	: _type(EVENT_OBJECT_TYPE_NONE)
 {
+#ifdef WIN32
+	memset(&_overlapped, 0, sizeof(_overlapped));
+#endif
 }
 
 EventObject::~EventObject()
