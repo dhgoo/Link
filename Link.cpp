@@ -38,7 +38,7 @@ Link::~Link()
 		delete _ioMultiplexer;
 }
 
-bool Link::init(int maxSessions)
+bool Link::init()
 {
 #ifdef WIN32
 	WSADATA WSAData;
@@ -49,10 +49,10 @@ bool Link::init(int maxSessions)
 	_networkThread = new NetworkThread(*this);
 
 	_ioMultiplexer = new IOMultiplexer();
-	if (_ioMultiplexer->create(maxSessions) == false)
+	if (_ioMultiplexer->create() == false)
 		return false;
 
-	_sessionManager = new SessionManager(maxSessions);
+	_sessionManager = new SessionManager();
 
 	_acceptorManager = new AcceptorManager(_ioMultiplexer, _sessionManager);
 
@@ -111,4 +111,5 @@ bool Link::connect(const char* ip, unsigned short port, Dispatcher* disp)
 
 	return true;
 }
+
 

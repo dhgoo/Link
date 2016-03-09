@@ -46,5 +46,17 @@ public:
 
 	// nagle algorithm off
 	bool nagleoff();
+
+	// 
+	int getSendBufSize();
+
+	//
+	int getRecvBufSize();
+
+	// 
+	bool setSendBufSize(int size);
+
+	// 
+	bool setRecvBufSize(int size);
 };
 

@@ -40,6 +40,6 @@ public:
 	bool connect(const char* ip, unsigned short port, Dispatcher* disp);
 
 private:
-	bool init(int maxSessions = MAX_SESSIONS);
+	bool init();
 };
 

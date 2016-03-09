@@ -3,8 +3,7 @@
 #include "Session.h"
 #include "IOMultiplexer.h"
 
-SessionManager::SessionManager(int maxsessions)
-	: _maxSessions(maxsessions)
+SessionManager::SessionManager()
 {
 }
 

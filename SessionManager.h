@@ -9,10 +9,9 @@ class SessionManager
 
 private:
 	Sessions _activatedSessions;
-	int _maxSessions;
 
 public:
-	SessionManager(int maxSessions);
+	SessionManager();
 	~SessionManager();
 
 	Session* create(Dispatcher* disp);

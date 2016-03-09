@@ -3,44 +3,13 @@
 #include "Session.h"
 #include "SessionManager.h"
 
+IOMultiplexer::IOMultiplexer()
 #ifdef WIN32
-IOMultiplexer::IOMultiplexer()
-{
-}
-
-IOMultiplexer::~IOMultiplexer()
-{
-	close();
-}
-
-bool IOMultiplexer::create(int maxevents)
-{
-	return true;
-}
-
-void IOMultiplexer::close()
-{
-}
-
-bool IOMultiplexer::regist(int fd, uint32_t events, void* ptr)
-{
-	return true;
-}
-
-bool IOMultiplexer::unregist(int fd)	
-{
-	return true;
-}
-
-bool IOMultiplexer::waitForEvents()
-{
-	return true;
-}
+	: _hCompletionHandle(INVALID_HANDLE_VALUE)
 #else
-IOMultiplexer::IOMultiplexer()
 	: _epfd(-1)
-	, _maxevents(0)
 	, _events(nullptr)
+#endif
 {
 }
 
@@ -49,11 +18,17 @@ IOMultiplexer::~IOMultiplexer()
 	close();
 }
 
-bool IOMultiplexer::create(int maxevents)
+bool IOMultiplexer::create()
 {
-	_maxevents = maxevents;
-
-	_events = new epoll_event[maxevents];
+#ifdef WIN32
+	_hCompletionHandle = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
+	if (NULL == _hCompletionHandle)
+	{
+		printf("fail CreateIoCompletionPort(%u)", GetLastError());
+		return false;
+	}
+#else
+	_events = new epoll_event[MAX_EVENT];
 
 	// Nowadays, size is ignored
 	_epfd = epoll_create(maxevents);
@@ -64,18 +39,30 @@ bool IOMultiplexer::create(int maxevents)
 	}
 
 	printf("epfd: %d\n", _epfd);
-
+#endif
 	return true;
 }
 
+
 void IOMultiplexer::close()
 {
+#ifdef WIN32
+	if (_hCompletionHandle != INVALID_HANDLE_VALUE)
+		CloseHandle(_hCompletionHandle);
+#else
 	::close(_epfd);
 
 	if (_events != nullptr)
 		delete[] _events;
+#endif
 }
 
+#ifdef WIN32
+bool IOMultiplexer::regist(int fd, uint32_t events, void* ptr)
+{
+	return true;
+}
+#else
 bool IOMultiplexer::regist(int fd, uint32_t events, void* ptr)
 {
 	epoll_event ev;
@@ -92,7 +79,14 @@ bool IOMultiplexer::regist(int fd, uint32_t events, void* ptr)
 
 	return true;
 }
+#endif
 
+#ifdef WIN32
+bool IOMultiplexer::unregist(int fd)
+{
+	return true;
+}
+#else
 bool IOMultiplexer::unregist(int fd)
 {
 	epoll_event ev;
@@ -107,11 +101,18 @@ bool IOMultiplexer::unregist(int fd)
 
 	return true;
 }
+#endif
 
+#ifdef WIN32
+bool IOMultiplexer::waitForEvents()
+{
+	return true;
+}
+#else
 bool IOMultiplexer::waitForEvents()
 {
 	int timeout = -1;
-	int nfds = epoll_wait(_epfd, _events, _maxevents, timeout);
+	int nfds = epoll_wait(_epfd, _events, MAX_EVENT, timeout);
 	if (nfds == -1)
 	{
 		if (errno != EINTR)
@@ -151,5 +152,3 @@ bool IOMultiplexer::waitForEvents()
 	return true;		
 }
 #endif
-
-

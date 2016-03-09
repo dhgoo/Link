@@ -194,3 +194,70 @@ bool Socket::nagleoff()
 	
 	return true;
 }
+
+int Socket::getSendBufSize()
+{
+	int bufsize = 0;
+#ifdef WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
+#else //WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
+#endif //WIN32
+	{
+		printf("fail setsockopt(SO_SNDBUF) err(%d) : %s\n", errno, strerror(errno));
+		return -1;
+	}
+	
+	return bufsize;
+}
+
+int Socket::getRecvBufSize()
+{
+	int bufsize = 0;
+#ifdef WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
+#else //WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
+#endif //WIN32
+	{
+		printf("fail setsockopt(SO_REVBUF) err(%d) : %s\n", errno, strerror(errno));
+		return -1;
+	}
+	
+	return bufsize;
+}
+
+bool Socket::setSendBufSize(int size)
+{
+	int bufsize = size;
+#ifdef WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
+#else //WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
+#endif //WIN32
+	{
+		printf("fail setsockopt(SO_SNDBUF) err(%d) : %s\n", errno, strerror(errno));
+		return false;
+	}
+	
+	return true;
+}
+
+bool Socket::setRecvBufSize(int size)
+{
+	int bufsize = size;
+#ifdef WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (const char*)&bufsize, sizeof(bufsize)) != 0)
+#else //WIN32
+	if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, (void*)&bufsize, sizeof(bufsize)) != 0)
+#endif //WIN32
+	{
+		printf("fail setsockopt(SO_REVBUF) err(%d) : %s\n", errno, strerror(errno));
+		return false;
+	}
+	
+	return true;
+}
+
+
+
