@@ -10,14 +10,23 @@ enum EventObjectType
 	EVENT_OBJECT_SESSION,
 };
 
+#ifdef WIN32
+enum RequestEventType
+{
+	REQUEST_EVENT_SEND,
+	REQUEST_EVENT_RECV,
+};
+#endif
+
 class EventObject
 {
 protected:
 #ifdef WIN32
 	OVERLAPPED _overlapped;
-#else
-	Socket _sock;
+	int _eventType;
 #endif
+	Socket _sock;
+
 	int _type;	
 
 public:
@@ -27,6 +36,10 @@ public:
 	void setType(int type);
 	int getType();
 
+#ifdef WIN32
+	void setEventType(int type);
+	int getEventType();
+#endif
 	Socket& socket();
 
 	virtual void onAccept() = 0;

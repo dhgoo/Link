@@ -24,12 +24,12 @@ public:
 
 #ifdef WIN32
 	bool regist(SOCKET s);
-	bool unregist(int fd);
-	bool waitForEvents(unsigned long* transferred, unsigned long* key, LPOVERLAPPED* overlapped);
+	bool unregist(int fd);	
 #else
 	bool regist(int fd, uint32_t events, void* ptr);	
 	bool unregist(int fd);	
-	bool waitForEvents();
 #endif
+
+	void waitForEvents();
 };
 

@@ -111,21 +111,54 @@ bool IOMultiplexer::unregist(int fd)
 #endif
 
 #ifdef WIN32
-bool IOMultiplexer::waitForEvents()
+void IOMultiplexer::waitForEvents()
 {
-#ifdef WIN32
 	LPOVERLAPPED	overlapped = nullptr;
 	unsigned long	transferred = 0;
 	unsigned long	key = 0;
-	bool			result = false;
-#endif
+	BOOL			result = FALSE;
 
-	return GetQueuedCompletionStatus(_iocp, transferred, key, overlapped, INFINITE) ? true : false;
+	result = GetQueuedCompletionStatus(_iocp, &transferred, &key, &overlapped, INFINITE);
+	if (result == FALSE && overlapped == NULL)
+	{
+		// TODO print critical log
+	}
+	else
+	{
+		if (key == 0)
+		{
+			// TODO print log
+		}
 
-	EventObject
+		EventObject* e = (EventObject*)overlapped;
+		int events = e->getEventType();
+
+		if (e->getType() == EVENT_OBJECT_ACCEPTOR)
+		{
+			if (events == REQUEST_EVENT_RECV)
+				e->onAccept();
+			else
+				e->onError(EVENT_ERROR_IO);
+		}
+		else if (e->getType() == EVENT_OBJECT_SESSION)
+		{
+			if (events == REQUEST_EVENT_RECV)
+				e->onRecv();
+			else if (events == REQUEST_EVENT_SEND)
+				e->onSend();
+			else
+				e->onError(EVENT_ERROR_IO);
+		}
+		else
+		{
+			assert(false);
+		}
+
+		SAFE_DELETE(e);
+	}
 }
 #else
-bool IOMultiplexer::waitForEvents()
+void IOMultiplexer::waitForEvents()
 {
 	int timeout = -1;
 	int nfds = epoll_wait(_epfd, _events, MAX_EVENT, timeout);
@@ -134,13 +167,13 @@ bool IOMultiplexer::waitForEvents()
 		if (errno != EINTR)
 		{
 			printf("fail epoll_wait() error(%d): %s\n", errno, strerror(errno));
-			return false;
+			return;
 		}
 	}
 
 	for (int i = 0; i < nfds; ++i)
 	{
-		EventObject *e = (EventObject* )_events[i].data.ptr;
+		EventObject* e = (EventObject*)_events[i].data.ptr;
 		int events = _events[i].events;
 
 		if (e->getType() == EVENT_OBJECT_ACCEPTOR)
@@ -164,7 +197,5 @@ bool IOMultiplexer::waitForEvents()
 			assert(false);
 		}
 	}
-
-	return true;		
 }
 #endif

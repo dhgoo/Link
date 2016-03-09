@@ -23,6 +23,18 @@ int EventObject::getType()
 	return _type;
 }
 
+#ifdef WIN32
+void EventObject::setEventType(int type)
+{
+	_eventType = type;
+}
+
+int EventObject::getEventType()
+{
+	return _eventType;
+}
+#endif
+
 Socket& EventObject::socket()
 {
 	return _sock;
