@@ -19,6 +19,10 @@ public:
 	bool open(unsigned short port);
 	bool open(const char* ip, unsigned short port);
 
+#ifdef WIN32
+	bool waitForAccept();
+#endif
+
 	void onAccept();
 	void onRecv();
 	void onSend();

@@ -44,6 +44,7 @@ public:
 
 	virtual void onAccept() = 0;
 	virtual void onRecv() = 0;
+
 	virtual void onSend() = 0;
 	virtual void onError(int err) = 0;
 };

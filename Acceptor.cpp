@@ -34,7 +34,11 @@ bool Acceptor::open(const char* ip, unsigned short port)
 		return false;
 
 #ifdef WIN32
+	if (_ioMux->regist(_sock.getfd()) == false)
+		return false;
 
+	if (waitForAccept() == false)
+		return false;
 #else
 	uint32_t events = EPOLLIN | EPOLLHUP | EPOLLERR;
 	if (_ioMux->regist(_sock.getfd(), events, this) == false)
@@ -43,6 +47,19 @@ bool Acceptor::open(const char* ip, unsigned short port)
 
 	return true;
 }
+
+#ifdef WIN32
+bool Acceptor::waitForAccept()
+{
+	static char buf[32] = { 0, };
+	unsigned long received = 0;
+	SOCKET s = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	if (INVALID_SOCKET == AcceptEx(_sock.getfd(), s, buf, 0, 32, 32, &received, (LPOVERLAPPED)this))
+		return false;
+
+	return true;
+}
+#endif
 
 void Acceptor::onAccept()
 {

@@ -6,6 +6,7 @@
 
 #ifdef WIN32
 #include <WinSock2.h>
+#include <Mswsock.h>
 #include <io.h>
 #else //WIN32
 #include <errno.h>
