@@ -7,12 +7,19 @@ private:
 
 public:
 	Socket();
+	~Socket();
 
 	// 
 	void setfd(int fd);
 
 	// return socket file descriptor
 	int getfd();
+
+	// 
+	void setSocket(SOCKET s);
+
+	//
+	int getSocket();
 
 	// create socket. using SOCK_STREAM or SOCK_DGRAM for type
 	int create(int type);
@@ -46,6 +53,10 @@ public:
 
 	// nagle algorithm off
 	bool nagleoff();
+
+#ifdef WIN32
+	bool inheritProperties(SOCKET parent);
+#endif
 
 	// 
 	int getSendBufSize();

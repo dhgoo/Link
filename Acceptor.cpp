@@ -51,16 +51,42 @@ bool Acceptor::open(const char* ip, unsigned short port)
 #ifdef WIN32
 bool Acceptor::waitForAccept()
 {
-	static char buf[32] = { 0, };
+	// OVERLAPPED 구조체를 초기화 시켜주지 않으면, IOCP가 제대로 동작하지 않는다
+	OVERLAPPED* p = static_cast<OVERLAPPED*>(this);
+	memset(p, 0, sizeof(OVERLAPPED));
+	memset(&_acceptBuffer, 0, sizeof(_acceptBuffer));
 	unsigned long received = 0;
-	SOCKET s = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	if (INVALID_SOCKET == AcceptEx(_sock.getfd(), s, buf, 0, 32, 32, &received, (LPOVERLAPPED)this))
+
+	_acceptSocket.create(SOCK_STREAM);
+
+	if (INVALID_SOCKET == AcceptEx(_sock.getSocket(), _acceptSocket.getSocket(), _acceptBuffer, MAX_ACCEPT_BUFFER - ((sizeof(sockaddr_in)+16)*2),
+								sizeof(sockaddr_in)+16, sizeof(sockaddr_in)+16, &received, (LPOVERLAPPED)this))
 		return false;
 
 	return true;
 }
 #endif
 
+#ifdef WIN32
+void Acceptor::onAccept()
+{
+	_acceptSocket.inheritProperties(_sock.getSocket());
+
+	sockaddr_in addr;
+	int len = sizeof(addr);
+	getpeername(_acceptSocket.getSocket(), (sockaddr*)&addr, &len);
+
+	Session* session = _ssMgr->create(_disp);
+
+	session->socket().setSocket(_acceptSocket.getSocket());
+
+	_ioMux->regist(_acceptSocket.getSocket());
+
+	waitForAccept();
+
+	printf("ip = %s  port = %d\n", inet_ntoa(addr.sin_addr), ntohs((short)addr.sin_port));
+}
+#else
 void Acceptor::onAccept()
 {
 	sockaddr_in addr;
@@ -75,29 +101,9 @@ void Acceptor::onAccept()
 
 	s->socket().setfd(fd);
 
-#ifdef WIN32
-
-#else
-	uint32_t events = EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLERR;
-	if (_ioMux->regist(s->socket().getfd(), events, s) == false)
-	{
-		printf("cannot regist event for new session\n");
-		return;
-	}
-#endif
-
 	printf( "ip = %s  port = %d\n", inet_ntoa(addr.sin_addr),  ntohs((short)addr.sin_port));
 }
-
-void Acceptor::onRecv()
-{
-	// can't reach
-}
-
-void Acceptor::onSend()
-{
-	// can't reach
-}
+#endif
 
 void Acceptor::onError(int err)
 {

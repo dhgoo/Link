@@ -3,10 +3,10 @@
 
 EventObject::EventObject()
 	: _type(EVENT_OBJECT_TYPE_NONE)
-{
 #ifdef WIN32
-	memset(&_overlapped, 0, sizeof(_overlapped));
+	, _ioType(IO_RECV)
 #endif
+{
 }
 
 EventObject::~EventObject()
@@ -24,14 +24,14 @@ int EventObject::getType()
 }
 
 #ifdef WIN32
-void EventObject::setEventType(int type)
+void EventObject::setIoType(int type)
 {
-	_eventType = type;
+	_ioType = type;
 }
 
-int EventObject::getEventType()
+int EventObject::getIoType()
 {
-	return _eventType;
+	return _ioType;
 }
 #endif
 

@@ -2,6 +2,8 @@
 
 #include "EventObject.h"
 
+#define MAX_ACCEPT_BUFFER 1024
+
 class IOMultiplexer;
 class SessionManager;
 class Dispatcher;
@@ -12,6 +14,11 @@ private:
 	IOMultiplexer* _ioMux;
 	SessionManager* _ssMgr;
 	Dispatcher* _disp;
+
+#ifdef WIN32
+	char _acceptBuffer[MAX_ACCEPT_BUFFER];
+	Socket _acceptSocket;
+#endif
 	
 public:
 	Acceptor(IOMultiplexer* ioMux, SessionManager* ssMgr, Dispatcher* disp);
@@ -24,8 +31,6 @@ public:
 #endif
 
 	void onAccept();
-	void onRecv();
-	void onSend();
 	void onError(int err);
 };
 

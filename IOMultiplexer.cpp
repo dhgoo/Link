@@ -1,5 +1,6 @@
 #include "Precompiled.h"
 #include "IOMultiplexer.h"
+#include "Acceptor.h"
 #include "Session.h"
 #include "SessionManager.h"
 
@@ -119,42 +120,35 @@ void IOMultiplexer::waitForEvents()
 	BOOL			result = FALSE;
 
 	result = GetQueuedCompletionStatus(_iocp, &transferred, &key, &overlapped, INFINITE);
-	if (result == FALSE && overlapped == NULL)
+	if (result == FALSE || overlapped == NULL)
 	{
 		// TODO print critical log
+		printf("%u\n", GetLastError());
+		return;
+	}
+
+	EventObject* e = (EventObject*)overlapped;
+	int io = e->getIoType();
+
+	if (e->getType() == EVENT_OBJECT_ACCEPTOR)
+	{
+		if (io == IO_RECV)
+			((Acceptor*)e)->onAccept();
+		else
+			((Acceptor*)e)->onError(EVENT_ERROR_IO);
+	}
+	else if (e->getType() == EVENT_OBJECT_SESSION)
+	{
+		if (io == IO_RECV)
+			e->onRecv();
+		else if (io == IO_SEND)
+			e->onSend();
+		else
+			e->onError(EVENT_ERROR_IO);
 	}
 	else
 	{
-		if (key == 0)
-		{
-			// TODO print log
-		}
-
-		EventObject* e = (EventObject*)overlapped;
-		int events = e->getEventType();
-
-		if (e->getType() == EVENT_OBJECT_ACCEPTOR)
-		{
-			if (events == REQUEST_EVENT_RECV)
-				e->onAccept();
-			else
-				e->onError(EVENT_ERROR_IO);
-		}
-		else if (e->getType() == EVENT_OBJECT_SESSION)
-		{
-			if (events == REQUEST_EVENT_RECV)
-				e->onRecv();
-			else if (events == REQUEST_EVENT_SEND)
-				e->onSend();
-			else
-				e->onError(EVENT_ERROR_IO);
-		}
-		else
-		{
-			assert(false);
-		}
-
-		SAFE_DELETE(e);
+		assert(false);
 	}
 }
 #else

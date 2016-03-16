@@ -6,6 +6,15 @@ Socket::Socket()
 {
 }
 
+Socket::~Socket()
+{
+#ifdef WIN32
+	closesocket(_fd);
+#else
+	close(_fd);
+#endif
+}
+
 void Socket::setfd(int fd)
 {
 	_fd = fd;
@@ -16,13 +25,25 @@ int Socket::getfd()
 	return _fd;
 }
 
+void Socket::setSocket(SOCKET s)
+{
+	_fd = s;
+}
+
+int Socket::getSocket()
+{
+	return _fd;
+}
+
 int Socket::create(int type)
 {
-	_fd = socket(AF_INET, type, 0);
-	if (_fd == -1)
 #ifdef WIN32
+	_fd = WSASocket(AF_INET, type, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	if (_fd == INVALID_SOCKET)
 		printf("fail socket() err(%d)\n", WSAGetLastError());
 #else
+	_fd = socket(AF_INET, type, 0);
+	if (_fd == -1)
 		printf("fail socket() err(%d) : %s\n", errno, strerror(errno));
 #endif
 	
@@ -194,6 +215,19 @@ bool Socket::nagleoff()
 	
 	return true;
 }
+
+#ifdef WIN32
+bool Socket::inheritProperties(SOCKET parent)
+{
+	if (setsockopt(_fd, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (const char*)&parent, sizeof(parent)) != 0)
+	{
+		printf("fail setsockopt(SO_UPDATE_ACCEPT_CONTEXT) err(%d) : %s\n", errno, strerror(errno));
+		return false;
+	}
+
+	return true;
+}
+#endif
 
 int Socket::getSendBufSize()
 {
